@@ -15,6 +15,9 @@
  */
 package io.spring.batch.configuration;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -51,8 +54,8 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public Job job() {
-		return this.jobBuilderFactory.get("job")
+	public Job job1() {
+		return this.jobBuilderFactory.get("job1")
 				.start(step1())
 				.next(step2())
 				.incrementer(new RunIdIncrementer())
@@ -75,5 +78,18 @@ public class BatchConfiguration {
 					Thread.sleep(this.random.nextInt(10000));
 					return RepeatStatus.FINISHED;
 				}).build();
+	}
+
+	@Bean
+	public Job job2() {
+		return jobBuilderFactory.get("job2")
+				.start(stepBuilderFactory.get("job2step1")
+						.tasklet((contribution, chunkContext) -> {
+							Thread.sleep(this.random.nextInt(10000));
+							return RepeatStatus.FINISHED;
+						})
+						.build())
+				.incrementer(new RunIdIncrementer())
+				.build();
 	}
 }
